@@ -2,6 +2,7 @@ import { QuickPickItem, WorkspaceConfiguration, DebugConfiguration, OutputChanne
 import * as cp from 'child_process';
 import * as async from './novsc/async';
 import { Dict } from './novsc/commonTypes';
+import * as fs from 'fs';
 import {expandVariablesInObject } from './novsc/expand';
 
 // Expands variable references of the form ${dbgconfig:name} in all properties of launch configuration.
@@ -72,6 +73,16 @@ export function logProcessOutput(process: cp.ChildProcess, output: OutputChannel
     });
     process.stderr.on('data', chunk => {
         output.append(chunk.toString());
+    });
+}
+
+export function streamFileOutput(path: string, output: OutputChannel) {
+    fs.readFile(path, (err, data) => {
+        if (err) {
+            output.appendLine(err.toString());
+        } else {
+            output.append(data.toString());
+        }
     });
 }
 

@@ -29,6 +29,7 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::str;
 use std::time;
+use std::fs::File;
 
 use futures;
 use futures::prelude::*;
@@ -804,6 +805,14 @@ impl DebugSession {
         } else {
             log_errors!(self.process.resume());
         }
+
+        if let Some(paths) = args.redirect_to_console {
+            let split = paths.split(',');
+            for str in split {
+                let file = File::open(str)?;
+            }
+        }
+
 
         if let Some(commands) = args.common.post_run_commands {
             self.exec_commands("postRunCommands", &commands)?;

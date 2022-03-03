@@ -778,6 +778,11 @@
 								"description": "Enable reverse debugging (Requires reverse execution support in the debug server, see User's Manual for details).",
 								"type": "boolean",
 								"default": false
+							},
+							"redirectToConsole": {
+								"description": "Redirect these file stream to the debug console.",
+								"type": "array",
+								"default": []
 							}
 						}
 					},

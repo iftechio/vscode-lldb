@@ -434,6 +434,10 @@ class Extension implements DebugConfigurationProvider, DebugAdapterDescriptorFac
             adapterParams.sourceLanguages = session.configuration.sourceLanguages;
             delete session.configuration.sourceLanguages;
         }
+        if (session.configuration.redirectToConsole as Array<string>) {
+            adapterParams.redirectToConsole = session.configuration.redirectToConsole.join(',');
+            delete session.configuration.redirectToConsole;
+        }
 
         try {
             let [adapter, port] = await this.startDebugAdapter(session.workspaceFolder, adapterParams);

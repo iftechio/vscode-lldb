@@ -227,6 +227,7 @@ pub struct AttachRequestArguments {
     pub program: Option<String>,
     pub pid: Option<Pid>,
     pub wait_for: Option<bool>,
+    pub redirect_to_console: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
