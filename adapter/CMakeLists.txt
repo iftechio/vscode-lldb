@@ -5,7 +5,7 @@ else()
 endif()
 set(LLDB_LinkSearch "${CMAKE_BINARY_DIR}/lldb/lib" CACHE STRING "" FORCE)
 
-set(CargoFlags ${CargoFlags} --manifest-path=${CMAKE_SOURCE_DIR}/Cargo.toml
+set(CargoFlags ${CargoFlags} --manifest-path=${CMAKE_SOURCE_DIR}/adapter/Cargo.toml
                              --target=${LLVM_TRIPLE} --target-dir=${CMAKE_BINARY_DIR}/target)
 if (CMAKE_BUILD_TYPE MATCHES Release|RelWithDebInfo)
     set(CargoFlags ${CargoFlags} --release)

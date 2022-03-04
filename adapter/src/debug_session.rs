@@ -25,11 +25,14 @@ use std::collections::HashMap;
 use std::env;
 use std::ffi::CStr;
 use std::fmt::Write;
+use std::fs::File;
+use std::fs::OpenOptions;
+use std::os::unix::prelude::OpenOptionsExt;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::str;
 use std::time;
-use std::fs::File;
+extern crate libc;
 
 use futures;
 use futures::prelude::*;
@@ -229,6 +232,25 @@ impl DebugSession {
         tokio::spawn(async move {
             while let Some(event) = python_events.recv().await {
                 log_errors!(dap_session.send_event(event).await);
+            }
+        });
+    }
+
+    fn pipe_file_to_console(dap_session: &DAPSession, mut con_reader: tokio::fs::File) {
+        let dap_session = dap_session.clone();
+        tokio::spawn(async move {
+            let mut con_data = [0u8; 16];
+            loop {
+                if let Ok(bytes) = con_reader.read(&mut con_data).await {
+                    if bytes == 0 {
+                        continue;
+                    }
+                    let event = EventBody::output(OutputEventBody {
+                        output: String::from_utf8_lossy(&con_data[0..bytes]).into(),
+                        ..Default::default()
+                    });
+                    log_errors!(dap_session.send_event(event).await);
+                }
             }
         });
     }
@@ -807,12 +829,11 @@ impl DebugSession {
         }
 
         if let Some(paths) = args.redirect_to_console {
-            let split = paths.split(',');
-            for str in split {
-                let file = File::open(str)?;
+            for str in paths {
+                let file = OpenOptions::new().read(true).custom_flags(libc::O_NONBLOCK).open(str)?;
+                DebugSession::pipe_file_to_console(&self.dap_session, tokio::fs::File::from_std(file));
             }
         }
-
 
         if let Some(commands) = args.common.post_run_commands {
             self.exec_commands("postRunCommands", &commands)?;
